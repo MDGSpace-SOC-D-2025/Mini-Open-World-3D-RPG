@@ -11,4 +11,5 @@ Mini3DRPG.sln
 *.pak
 *.log
 *.vsconfig
-Content/
+Content/Fab/
+Content/Stuff/
