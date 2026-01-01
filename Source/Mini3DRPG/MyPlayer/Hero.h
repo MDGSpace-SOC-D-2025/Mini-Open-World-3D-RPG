@@ -2,13 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
 #include "InputActionValue.h"
-#include "Hero.generated.h"
 
-class UInputMappingContext;
-class UInputAction;
-class UCameraComponent;
-class USpringArmComponent; 
+#include "Hero.generated.h"
 
 UCLASS()
 class MINI3DRPG_API AHero : public ACharacter
@@ -60,32 +58,14 @@ protected:
 	void Look(const FInputActionValue& InputValue);
 	void Jump();
 
-	//sprint sh8
+	//Sprinting
 	void StartSprint();
 	void StopSprint();
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float WalkSpeed;
+	float RunSpeed = 1000;
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float RunSpeed;
+	float WalkSpeed = 600;
 
-	bool bIsRunning;
-
-	//Stamina
-	void UpdateStamina();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float MaxStamina;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	float CurrentStamina;
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	float StaminaDrainTime;
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	float StaminaRefillTime;
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	float DelayBeforeRefill;
-
-	float CurrentRefillDelayTime;
-	bool bHasStamina;
 
 };
