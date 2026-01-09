@@ -45,6 +45,7 @@ void AHero::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UpdateStamina();
 }
 
 // Called to bind functionality to input
@@ -104,10 +105,55 @@ void AHero::Jump()
 
 void AHero::StartSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	if (bHasStamina)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+
+		if (GetVelocity().Size() >= 0.5)
+		{
+			bIsRunning = true;
+		}
+		else
+		{
+			bIsRunning = false;
+		}
+	}
 }
 
 void AHero::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	bIsRunning = false;
+
+}
+
+void AHero::UpdateStamina()
+{
+	//Drain Stamina
+
+	if (bIsRunning)
+	{
+		CurrentStamina -= StaminaDrainTime;
+		CurrentRefillDelayTime = DelayBeforeRefill;
+	}
+
+	if (!bIsRunning && CurrentStamina < MaxStamina)
+	{
+		CurrentRefillDelayTime--;
+		if (CurrentRefillDelayTime <= 0)
+		{
+			CurrentStamina += StaminaRefillTime;
+		}
+	}
+
+	if (CurrentStamina <= 0)
+	{
+		bHasStamina = false;
+		StopSprint();
+	}
+	else
+		bHasStamina = true;
+
+	GEngine->AddOnScreenDebugMessage(1,0.f,FColor::Green,FString::Printf(TEXT("Stamina: %.2f | Delay: %.2f | Running: %d | HasStamina: %d"), CurrentStamina, CurrentRefillDelayTime, bIsRunning, bHasStamina));
+
 }

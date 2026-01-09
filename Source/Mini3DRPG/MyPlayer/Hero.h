@@ -67,5 +67,25 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float WalkSpeed = 600;
 
+	bool bIsRunning;
+
+	//Stamina
+	void UpdateStamina();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float MaxStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	float CurrentStamina;
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float StaminaDrainTime;
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float StaminaRefillTime;
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float DelayBeforeRefill;
+
+	float CurrentRefillDelayTime;
+
+	bool bHasStamina;
+
 
 };
