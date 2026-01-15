@@ -33,10 +33,7 @@ void AMyCharacter::ShowJumpHint()
 {
 	if (!JumpHintWidget && JumpHintWidgetClass)
 	{
-		JumpHintWidget = CreateWidget<UUserWidget>(
-			GetWorld(),
-			JumpHintWidgetClass
-		);
+		JumpHintWidget = CreateWidget<UUserWidget>(GetWorld(), JumpHintWidgetClass);
 
 		if (JumpHintWidget)
 		{
@@ -58,10 +55,7 @@ void AMyCharacter::ShowWalkHint()
 {
 	if (!WalkHintWidget && WalkHintWidgetClass)
 	{
-		WalkHintWidget = CreateWidget<UUserWidget>(
-			GetWorld(),
-			WalkHintWidgetClass
-		);
+		WalkHintWidget = CreateWidget<UUserWidget>(GetWorld(), WalkHintWidgetClass);
 
 		if (WalkHintWidget)
 		{

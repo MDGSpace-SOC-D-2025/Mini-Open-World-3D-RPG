@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 AHero::AHero()
@@ -13,6 +14,7 @@ AHero::AHero()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//TP Camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("Spring Arm");
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->bUsePawnControlRotation = true;
@@ -22,6 +24,10 @@ AHero::AHero()
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	//Sword
+	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>("Sword");
+	SwordMesh->SetupAttachment(GetMesh(), "SwordSocket");
 }
 
 // Called when the game starts or when spawned
@@ -38,6 +44,8 @@ void AHero::BeginPlay()
 			Subsystem->AddMappingContext(InputMapping, 0);
 		}
 	}
+
+	SwordMesh->OnComponentBeginOverlap.AddDynamic(this, &AHero::OnSwordOverlapBegin);
 }
 
 // Called every frame
@@ -60,6 +68,7 @@ void AHero::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AHero::Jump);
 		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AHero::StartSprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &AHero::StopSprint);
+		Input->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AHero::Attack);
 
 	}
 
@@ -154,6 +163,70 @@ void AHero::UpdateStamina()
 	else
 		bHasStamina = true;
 
-	GEngine->AddOnScreenDebugMessage(1,0.f,FColor::Green,FString::Printf(TEXT("Stamina: %.2f | Delay: %.2f | Running: %d | HasStamina: %d"), CurrentStamina, CurrentRefillDelayTime, bIsRunning, bHasStamina));
+}
 
+void AHero::Attack()
+{
+	if (!bShouldDealDamage)
+	{
+		bIsAttacking = true;
+		GetMesh()->GetAnimInstance()->Montage_Play(AttackAnimation);
+
+	}
+}
+
+void AHero::OnSwordOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (bIsAttacking)
+	{
+		if (IsValid(OtherActor) && OtherActor != this)
+		{
+			OtherActor->Destroy();
+		}
+	}
+}
+
+//Trigger UIs
+void AHero::ShowJumpHint()
+{
+	if (!JumpHintWidget && JumpHintWidgetClass)
+	{
+		JumpHintWidget = CreateWidget<UUserWidget>(GetWorld(), JumpHintWidgetClass);
+
+		if (JumpHintWidget)
+		{
+			JumpHintWidget->AddToViewport();
+		}
+	}
+}
+
+void AHero::HideJumpHint()
+{
+	if (JumpHintWidget)
+	{
+		JumpHintWidget->RemoveFromParent();
+		JumpHintWidget = nullptr;
+	}
+}
+
+void AHero::ShowWalkHint()
+{
+	if (!WalkHintWidget && WalkHintWidgetClass)
+	{
+		WalkHintWidget = CreateWidget<UUserWidget>(GetWorld(), WalkHintWidgetClass);
+
+		if (WalkHintWidget)
+		{
+			WalkHintWidget->AddToViewport();
+		}
+	}
+}
+
+void AHero::HideWalkHint()
+{
+	if (WalkHintWidget)
+	{
+		WalkHintWidget->RemoveFromParent();
+		WalkHintWidget = nullptr;
+	}
 }

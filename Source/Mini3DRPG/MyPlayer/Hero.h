@@ -5,6 +5,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "Blueprint/UserWidget.h"
 
 #include "Hero.generated.h"
 
@@ -18,6 +19,9 @@ class MINI3DRPG_API AHero : public ACharacter
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* SwordMesh;
 
 protected:
 
@@ -35,6 +39,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	class UInputAction* SprintAction;
+
+	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
+	class UInputAction* AttackAction;
 
 public:
 	// Sets default values for this character's properties
@@ -87,5 +94,48 @@ protected:
 
 	bool bHasStamina;
 
+	//Attack
+	void Attack();
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackAnimation;
+
+		//Collision with sword
+	UFUNCTION()
+	void OnSwordOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsAttacking;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bShouldDealDamage;
+
+		//Movement during attack modifies
+	float DefaultWalkSpeed;
+
+	// UI class
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> JumpHintWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WalkHintWidgetClass;
+
+	// UI instance
+	UPROPERTY()
+	UUserWidget* JumpHintWidget;
+
+	UPROPERTY()
+	UUserWidget* WalkHintWidget;
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowJumpHint();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HideJumpHint();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowWalkHint();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HideWalkHint();
 };

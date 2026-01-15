@@ -35,7 +35,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WalkHintWidgetClass;
 
-	// UI instance
+		// UI instance
 	UPROPERTY()
 	UUserWidget* JumpHintWidget;
 
