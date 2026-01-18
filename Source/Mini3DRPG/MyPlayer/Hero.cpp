@@ -45,7 +45,7 @@ void AHero::BeginPlay()
 		}
 	}
 
-	SwordMesh->OnComponentBeginOverlap.AddDynamic(this, &AHero::OnSwordOverlapBegin);
+	//SwordMesh->OnComponentBeginOverlap.AddDynamic(this, &AHero::OnSwordOverlapBegin);
 }
 
 // Called every frame
@@ -175,6 +175,7 @@ void AHero::Attack()
 	}
 }
 
+/*
 void AHero::OnSwordOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (bIsAttacking)
@@ -185,6 +186,7 @@ void AHero::OnSwordOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 		}
 	}
 }
+*/
 
 //Trigger UIs
 void AHero::ShowJumpHint()
