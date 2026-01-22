@@ -14,14 +14,19 @@ class MINI3DRPG_API AHero : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+protected:
+
+	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class UCameraComponent* Camera;
 
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	class USpringArmComponent* SpringArm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* SwordMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UHealthComponent* HealthComp;
 
 protected:
 
@@ -112,6 +117,10 @@ protected:
 
 		//Movement during attack modifies
 	float DefaultWalkSpeed;
+
+	//Health
+	UFUNCTION()
+	void OnDeath();
 
 	// UI class
 	UPROPERTY(EditAnywhere, Category = "UI")

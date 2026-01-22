@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Mini3DRPG/Components/HealthComponent.h"
 
 // Sets default values
 AHero::AHero()
@@ -28,6 +29,10 @@ AHero::AHero()
 	//Sword
 	SwordMesh = CreateDefaultSubobject<UStaticMeshComponent>("Sword");
 	SwordMesh->SetupAttachment(GetMesh(), "SwordSocket");
+
+	//Health
+	HealthComp = CreateDefaultSubobject<UHealthComponent>("HealthComponent");
+
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +51,8 @@ void AHero::BeginPlay()
 	}
 
 	//SwordMesh->OnComponentBeginOverlap.AddDynamic(this, &AHero::OnSwordOverlapBegin);
+
+	HealthComp->OnDeath.AddDynamic(this, &AHero::OnDeath);
 }
 
 // Called every frame
@@ -187,6 +194,11 @@ void AHero::OnSwordOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 	}
 }
 */
+
+void AHero::OnDeath()
+{
+	Destroy();
+}
 
 //Trigger UIs
 void AHero::ShowJumpHint()
