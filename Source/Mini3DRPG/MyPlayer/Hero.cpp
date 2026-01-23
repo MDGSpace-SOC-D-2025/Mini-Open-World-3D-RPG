@@ -9,6 +9,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Mini3DRPG/Components/HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "InputCoreTypes.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values
 AHero::AHero()
@@ -55,23 +57,29 @@ void AHero::BeginPlay()
 
 	HealthComp->OnDeath.AddDynamic(this, &AHero::OnDeath);
 
-	//Save/Load systumm
-	if (UGameplayStatics::DoesSaveGameExist(TEXT("save1"), 0))
+	// Save/Load system
+	if (!bSkipAutoLoad)
 	{
-		SaveObject = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("save1"), 0));
-
-		if (SaveObject)
+		if (UGameplayStatics::DoesSaveGameExist(TEXT("save1"), 0))
 		{
-			SetActorTransform(SaveObject->PlayerTransform, false, nullptr, ETeleportType::TeleportPhysics);
-			UE_LOG(LogTemp, Warning, TEXT("Auto Loaded Position"));
+			SaveObject = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("save1"), 0));
+
+			if (SaveObject)
+			{
+				SetActorTransform(SaveObject->PlayerTransform, false, nullptr, ETeleportType::TeleportPhysics);
+				UE_LOG(LogTemp, Warning, TEXT("Auto Loaded Position"));
+			}
+		}
+		else
+		{
+			SaveObject = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+
+			UGameplayStatics::SaveGameToSlot(SaveObject, TEXT("save1"), 0);
 		}
 	}
-	else
-	{
-		SaveObject = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
 
-		UGameplayStatics::SaveGameToSlot(SaveObject, TEXT("save1"), 0);
-	}
+	bSkipAutoLoad = false;
+
 }
 
 // Called every frame
@@ -97,6 +105,7 @@ void AHero::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		Input->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AHero::Attack);
 		Input->BindAction(SaveAction, ETriggerEvent::Triggered, this, &AHero::SaveGame);
 		Input->BindAction(LoadAction, ETriggerEvent::Triggered, this, &AHero::LoadGame);
+		Input->BindAction(PauseMenuAction, ETriggerEvent::Started, this, &AHero::TogglePauseMenu);
 	}
 
 }
@@ -220,6 +229,8 @@ void AHero::OnDeath()
 	Destroy();
 }
 
+bool AHero::bSkipAutoLoad = false;
+
 void AHero::SaveGame()
 {
 	if (!SaveObject)
@@ -256,6 +267,67 @@ void AHero::LoadGame()
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Loaded Position: %s"), *L.ToString()));
 	}
 }
+
+void AHero::TogglePauseMenu()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC) return;
+
+	if (!PauseMenuInstance)
+	{
+		if (!PauseMenuClass) return;
+		PauseMenuInstance = CreateWidget<UUserWidget>(PC, PauseMenuClass);
+	}
+
+	if (!bPauseMenuOpen)
+	{
+		PauseMenuInstance->AddToViewport();
+
+		PC->bShowMouseCursor = true;
+
+		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(PauseMenuInstance->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PC->SetInputMode(InputMode);
+
+		// Lock movement & camera
+		PC->SetIgnoreMoveInput(true);
+		PC->SetIgnoreLookInput(true);
+
+		bPauseMenuOpen = true;
+	}
+	else
+	{
+		if (PauseMenuInstance->IsInViewport())
+		{
+			PauseMenuInstance->RemoveFromParent();
+		}
+
+		PC->bShowMouseCursor = false;
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+
+		// Restore movement & camera
+		PC->SetIgnoreMoveInput(false);
+		PC->SetIgnoreLookInput(false);
+
+		bPauseMenuOpen = false;
+	}
+}
+
+void AHero::RestartLevel()
+{
+	bSkipAutoLoad = true; 
+	
+	UWorld* World = GetWorld();
+	if (!World) return;
+
+	FName CurrentLevel = *World->GetName();
+
+	UGameplayStatics::OpenLevel(this, CurrentLevel);
+}
+
 
 //Trigger UIs
 void AHero::ShowJumpHint()

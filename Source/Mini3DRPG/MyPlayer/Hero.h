@@ -55,6 +55,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	class UInputAction* LoadAction;
 
+	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
+	class UInputAction* PauseMenuAction;
+
 public:
 	// Sets default values for this character's properties
 	AHero();
@@ -133,8 +136,28 @@ protected:
 	UPROPERTY()
 	UMySaveGame* SaveObject;
 
+	UFUNCTION(BlueprintCallable)
 	void SaveGame();
+
+	UFUNCTION(BlueprintCallable)
 	void LoadGame();
+
+	bool bCanToggleMenu = true;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UUserWidget* PauseMenuInstance;
+
+	bool bPauseMenuOpen = false;
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseMenu();
+
+	UFUNCTION(BlueprintCallable)
+	void RestartLevel();
+
+	static bool bSkipAutoLoad;
 
 	// UI class
 	UPROPERTY(EditAnywhere, Category = "UI")
