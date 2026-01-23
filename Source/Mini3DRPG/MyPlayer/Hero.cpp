@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Mini3DRPG/Components/HealthComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AHero::AHero()
@@ -53,6 +54,24 @@ void AHero::BeginPlay()
 	//SwordMesh->OnComponentBeginOverlap.AddDynamic(this, &AHero::OnSwordOverlapBegin);
 
 	HealthComp->OnDeath.AddDynamic(this, &AHero::OnDeath);
+
+	//Save/Load systumm
+	if (UGameplayStatics::DoesSaveGameExist(TEXT("save1"), 0))
+	{
+		SaveObject = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("save1"), 0));
+
+		if (SaveObject)
+		{
+			SetActorTransform(SaveObject->PlayerTransform, false, nullptr, ETeleportType::TeleportPhysics);
+			UE_LOG(LogTemp, Warning, TEXT("Auto Loaded Position"));
+		}
+	}
+	else
+	{
+		SaveObject = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+
+		UGameplayStatics::SaveGameToSlot(SaveObject, TEXT("save1"), 0);
+	}
 }
 
 // Called every frame
@@ -76,7 +95,8 @@ void AHero::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		Input->BindAction(SprintAction, ETriggerEvent::Triggered, this, &AHero::StartSprint);
 		Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &AHero::StopSprint);
 		Input->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AHero::Attack);
-
+		Input->BindAction(SaveAction, ETriggerEvent::Triggered, this, &AHero::SaveGame);
+		Input->BindAction(LoadAction, ETriggerEvent::Triggered, this, &AHero::LoadGame);
 	}
 
 }
@@ -198,6 +218,43 @@ void AHero::OnSwordOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 void AHero::OnDeath()
 {
 	Destroy();
+}
+
+void AHero::SaveGame()
+{
+	if (!SaveObject)
+	{
+		SaveObject = Cast<UMySaveGame>(
+			UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass())
+		);
+	}
+
+	SaveObject->PlayerTransform = GetActorTransform();
+
+	UGameplayStatics::SaveGameToSlot(SaveObject, TEXT("save1"), 0);
+
+	FVector L = SaveObject->PlayerTransform.GetLocation();
+
+	UE_LOG(LogTemp, Warning, TEXT("Saved Position: %s"), *L.ToString());
+
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Saved Position: %s"), *L.ToString()));
+
+
+}
+
+void AHero::LoadGame()
+{
+	SaveObject = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("save1"), 0));
+
+	if (SaveObject)
+	{
+		SetActorTransform(SaveObject->PlayerTransform, false, nullptr, ETeleportType::TeleportPhysics);
+
+		FVector L = SaveObject->PlayerTransform.GetLocation();
+		UE_LOG(LogTemp, Warning, TEXT("Loaded Position: %s"), *L.ToString());
+
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green, FString::Printf(TEXT("Loaded Position: %s"), *L.ToString()));
+	}
 }
 
 //Trigger UIs

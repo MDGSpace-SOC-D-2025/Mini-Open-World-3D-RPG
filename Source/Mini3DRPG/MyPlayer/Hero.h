@@ -6,6 +6,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "Blueprint/UserWidget.h"
+#include "Mini3DRPG/GameSave/MySaveGame.h"
 
 #include "Hero.generated.h"
 
@@ -47,6 +48,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
 	class UInputAction* AttackAction;
+
+	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
+	class UInputAction* SaveAction;
+
+	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
+	class UInputAction* LoadAction;
 
 public:
 	// Sets default values for this character's properties
@@ -121,6 +128,13 @@ protected:
 	//Health
 	UFUNCTION()
 	void OnDeath();
+
+	//Save/Load systumm
+	UPROPERTY()
+	UMySaveGame* SaveObject;
+
+	void SaveGame();
+	void LoadGame();
 
 	// UI class
 	UPROPERTY(EditAnywhere, Category = "UI")
