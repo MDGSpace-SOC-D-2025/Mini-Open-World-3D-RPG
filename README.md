@@ -17,7 +17,7 @@ A third-person Unreal Engine 5 game prototype featuring exploration and custom m
 Due to GitHub size limits the **Content folder is hosted externally**
 
 ### Download Content here:
-https://drive.google.com/your-link-here
+https://drive.google.com/drive/folders/1nKykv7p_P7Q1rKIMGFpEjok8nCDo3TSi?usp=sharing
 
 --------------------------------------
 
